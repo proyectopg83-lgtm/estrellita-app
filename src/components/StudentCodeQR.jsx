@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
 
+const PROD_DOMAIN = "https://estrellita-app.vercel.app"; // ⇦ TU dominio en Vercel
+const LOGIN_PATH  = "/login-student"; // ⇦ ajusta si tu ruta real es /login-estudiante
+
 export default function StudentCodeQR({ code, onClose }) {
   const [dataUrl, setDataUrl] = useState("");
   const [qrUrl, setQrUrl] = useState("");
@@ -9,16 +12,19 @@ export default function StudentCodeQR({ code, onClose }) {
   useEffect(() => {
     if (!code) return;
 
-    // ✅ Base dinámica: en prod será https://estrellita-app.vercel.app,
-    // en local será http://localhost:5173
-    const base = window.location.origin;
+    // 🔒 Fuerza dominio en producción; usa origin en local
+    const base = import.meta.env.PROD ? PROD_DOMAIN : window.location.origin;
 
-    // ✅ AJUSTA ESTA RUTA si la tuya es diferente (p. ej. "/login-estudiante")
-    const path = "/login-student";
+    // Construir URL destino del QR
+    const url = `${base}${LOGIN_PATH}?code=${encodeURIComponent(code)}`;
 
-    const url = `${base}${path}?code=${encodeURIComponent(code)}`;
+    // ✅ Pequeña “sanitización”: solo aceptamos nuestro dominio en PROD
+    if (import.meta.env.PROD && !url.startsWith(PROD_DOMAIN)) {
+      console.warn("[QR] URL rechazada por dominio no permitido:", url);
+      return;
+    }
+
     setQrUrl(url);
-
     QRCode.toDataURL(url, { margin: 1, scale: 8 }, (err, png) => {
       if (!err) setDataUrl(png);
     });
@@ -64,7 +70,7 @@ export default function StudentCodeQR({ code, onClose }) {
           <p style={{ margin: "24px 0" }}>Generando QR…</p>
         )}
 
-        {/* 👀 Mostrar la URL codificada para verificar que apunta a tu dominio */}
+        {/* Mostrar URL codificada para validar visualmente */}
         {qrUrl && (
           <p style={{ fontSize: 12, color: "#334155", wordBreak: "break-all", margin: "6px 0 12px" }}>
             {qrUrl}
@@ -100,6 +106,7 @@ export default function StudentCodeQR({ code, onClose }) {
               textDecoration: "none",
               boxShadow: "0 6px 12px rgba(0,0,0,.08)",
             }}
+            rel="noopener noreferrer"
           >
             Descargar PNG
           </a>
