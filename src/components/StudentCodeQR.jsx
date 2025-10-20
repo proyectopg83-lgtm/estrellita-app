@@ -4,21 +4,23 @@ import QRCode from "qrcode";
 
 export default function StudentCodeQR({ code, onClose }) {
   const [dataUrl, setDataUrl] = useState("");
+  const [qrUrl, setQrUrl] = useState("");
 
   useEffect(() => {
     if (!code) return;
 
-    // 🔗 1️⃣ Generar un link que lleve directo al login con el código del estudiante
-    const base =
-      import.meta.env.PROD
-        ? "https://TU-DOMINIO.com" // 🔸 cámbialo al dominio real cuando publiques
-        : "http://localhost:5173"; // 🔸 mientras desarrollas
+    // ✅ Base dinámica: en prod será https://estrellita-app.vercel.app,
+    // en local será http://localhost:5173
+    const base = window.location.origin;
 
-    const loginURL = `${base}/login-estudiante?code=${encodeURIComponent(code)}`;
+    // ✅ AJUSTA ESTA RUTA si la tuya es diferente (p. ej. "/login-estudiante")
+    const path = "/login-student";
 
-    // 2️⃣ Generar la imagen QR con ese enlace
-    QRCode.toDataURL(loginURL, { margin: 1, scale: 8 }, (err, url) => {
-      if (!err) setDataUrl(url);
+    const url = `${base}${path}?code=${encodeURIComponent(code)}`;
+    setQrUrl(url);
+
+    QRCode.toDataURL(url, { margin: 1, scale: 8 }, (err, png) => {
+      if (!err) setDataUrl(png);
     });
   }, [code]);
 
@@ -48,14 +50,7 @@ export default function StudentCodeQR({ code, onClose }) {
           fontFamily: '"Century Gothic", CenturyGothic, AppleGothic, sans-serif',
         }}
       >
-        <h3
-          style={{
-            margin: 0,
-            marginBottom: 10,
-            color: "#0d47a1",
-            fontWeight: 800,
-          }}
-        >
+        <h3 style={{ margin: 0, marginBottom: 10, color: "#0d47a1", fontWeight: 800 }}>
           Código del estudiante
         </h3>
 
@@ -63,14 +58,17 @@ export default function StudentCodeQR({ code, onClose }) {
           <img
             src={dataUrl}
             alt="QR del código del estudiante"
-            style={{
-              width: "min(320px, 70vw)",
-              height: "auto",
-              margin: "8px auto 12px",
-            }}
+            style={{ width: "min(320px, 70vw)", height: "auto", margin: "8px auto 12px" }}
           />
         ) : (
           <p style={{ margin: "24px 0" }}>Generando QR…</p>
+        )}
+
+        {/* 👀 Mostrar la URL codificada para verificar que apunta a tu dominio */}
+        {qrUrl && (
+          <p style={{ fontSize: 12, color: "#334155", wordBreak: "break-all", margin: "6px 0 12px" }}>
+            {qrUrl}
+          </p>
         )}
 
         <code
