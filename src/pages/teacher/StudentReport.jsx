@@ -869,7 +869,7 @@ export default function StudentReport() {
             marginBottom: 14,
           }}
         >
-          <h3 style={{ marginTop: 0, color: "#102a43" }}>🤖 Resumen inteligente</h3>
+          <h3 style={{ marginTop: 0, color: "#102a43" }}>🤖 Resumen </h3>
           {loadingRows ? (
             <p style={{ margin: 0, color: "#475569" }}>Analizando…</p>
           ) : !filteredRows.length ? (
