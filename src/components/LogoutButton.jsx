@@ -17,12 +17,12 @@ export default function LogoutButton() {
     <button
       onClick={handleClick}
       style={{
-        backgroundColor: "#FFD54F",          // amarillo suave
+        backgroundColor: "#FFD54F",          
         border: "none",
-        borderRadius: "30px",                // bordes redondeados
+        borderRadius: "30px",               
         padding: "0.6rem 1rem",
         fontWeight: 600,
-        boxShadow: "0 3px 6px rgba(0,0,0,0.1)", // sombra ligera
+        boxShadow: "0 3px 6px rgba(0,0,0,0.1)",
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
         fontFamily: '"Century Gothic", CenturyGothic, AppleGothic, sans-serif',
