@@ -180,8 +180,15 @@ export default function SentencesPage() {
   const hasPrev = !isText && idx > 0;
   const hasNext = !isText && idx < (set?.sentences?.length || 0) - 1;
 
-  // 🔁 Usa el nuevo hook: reset en vez de setTranscript
+  // 🔁 Hook de voz
   const { supported, listening, transcript, start, stop, reset } = useWebSpeech();
+
+  // ⛔️ Detener el reconocimiento si el usuario navega fuera de esta página
+  useEffect(() => {
+    return () => {
+      try { stop(); } catch {}
+    };
+  }, [stop]);
 
   const [resultAccuracy, setResultAccuracy] = useState(null);
   const [feedback, setFeedback] = useState("");
@@ -232,7 +239,7 @@ export default function SentencesPage() {
       return;
     }
     setErrorMsg("");
-    reset(); // limpia transcript con el nuevo hook
+    reset();
     setResultAccuracy(null);
     setFeedback("");
     setFeedbackTips([]);

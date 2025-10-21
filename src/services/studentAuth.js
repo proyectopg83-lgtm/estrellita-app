@@ -2,6 +2,12 @@
 import { supabase } from "../lib/supabaseClient";
 
 const KEY = "student_session_v1";
+// Posibles claves antiguas o auxiliares que queremos limpiar también
+const LEGACY_KEYS = [
+  "estrellita:student",
+  "estrellita:student_session",
+  "estrellita:last_route",
+];
 
 /* ------------------- Sesión local ------------------- */
 export function saveStudentSession(student) {
@@ -23,6 +29,11 @@ export function clearStudentSession() {
   try {
     localStorage.removeItem(KEY);
   } catch {}
+  // Limpia también posibles claves antiguas
+  for (const k of LEGACY_KEYS) {
+    try { localStorage.removeItem(k); } catch {}
+    try { sessionStorage.removeItem(k); } catch {}
+  }
 }
 
 /* ------------------- Normaliza código ------------------- */
@@ -47,7 +58,7 @@ export async function loginStudentByCode(code) {
     saveStudentSession(student);
     return student;
   } catch (e) {
-    console.warn("⚠️ RPC falló o no existe, usando SELECT directo:", e.message);
+    console.warn("⚠️ RPC falló o no existe, usando SELECT directo:", e?.message);
   }
 
   // Fallback: SELECT directo (si la RPC no existe)
@@ -67,13 +78,27 @@ export async function loginStudentByCode(code) {
 
 /* ------------------- Logout completo ------------------- */
 export async function logoutStudent() {
-  // 1️⃣ Limpia datos locales
-  clearStudentSession();
-
-  // 2️⃣ Limpia cualquier sesión de Supabase (si existe)
   try {
-    await supabase.auth.signOut();
-  } catch (err) {
-    console.warn("No había sesión de Supabase activa:", err.message);
+    // 1) Detener reconocimiento de voz si estaba activo (hook publica este stop)
+    try {
+      if (typeof window !== "undefined" && typeof window.__estrellitaStopSR === "function") {
+        window.__estrellitaStopSR();
+      }
+    } catch {}
+
+    // 2) Limpiar almacenamiento local/sesión (incluye claves legacy)
+    clearStudentSession();
+
+    // 3) Cerrar sesión de Supabase (si hubiese)
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn("No había sesión de Supabase activa:", err?.message);
+    }
+  } finally {
+    // 4) Navegación dura al login del estudiante (evita loops/errores de History)
+    if (typeof window !== "undefined") {
+      window.location.replace("/login-estudiante");
+    }
   }
 }

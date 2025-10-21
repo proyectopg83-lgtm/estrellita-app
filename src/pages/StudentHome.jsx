@@ -1,10 +1,10 @@
 // src/pages/StudentHome.jsx
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
   getStudentSession,
-  logoutStudent, // 👈 ahora usamos el logout completo (local + Supabase)
+  logoutStudent, // logout completo (local + Supabase + replace)
 } from "../services/studentAuth.js";
 
 import StudentCodeQR from "../components/StudentCodeQR.jsx";
@@ -16,19 +16,17 @@ function fullName(s) {
 }
 
 export default function StudentHome() {
-  const nav = useNavigate();
   const [student, setStudent] = useState(null);
   const [showQR, setShowQR] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // ✅ Solo leemos la sesión una vez; la redirección la maneja el guard PrivateStudent
+  // ✅ Leemos la sesión una vez; la redirección la maneja el guard PrivateStudent
   useEffect(() => {
     const s = getStudentSession();
     setStudent(s);
   }, []);
 
-  // Si esta página llega a montarse sin sesión (por ejemplo, acceso directo),
-  // mostramos un pequeño "skeleton". El guard debería evitar este estado.
+  // Si se monta sin sesión (acceso directo), mostramos un skeleton breve
   if (!student) {
     return <div style={{ padding: 24, textAlign: "center" }}>Cargando…</div>;
   }
@@ -37,9 +35,11 @@ export default function StudentHome() {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
-      await logoutStudent(); // 👈 limpia localStorage + supabase.auth.signOut()
+      setShowQR(false);     // cierra modal si estaba abierto
+      setStudent(null);     // evita render mientras se sale
+      await logoutStudent(); // hace location.replace("/login-estudiante")
     } finally {
-      nav("/login-estudiante", { replace: true });
+      // no usamos nav aquí; logoutStudent ya redirige con replace
     }
   };
 

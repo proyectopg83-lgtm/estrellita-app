@@ -101,6 +101,18 @@ export function useWebSpeech({ lang = "es-ES" } = {}) {
     setTranscript("");
   }, []);
 
+  // 👇 Publica un "stop global" para que logoutStudent() corte el micrófono antes de redirigir
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.__estrellitaStopSR = stop;
+    }
+    return () => {
+      if (typeof window !== "undefined" && window.__estrellitaStopSR === stop) {
+        try { delete window.__estrellitaStopSR; } catch {}
+      }
+    };
+  }, [stop]);
+
   return {
     supported,
     listening,
@@ -108,7 +120,7 @@ export function useWebSpeech({ lang = "es-ES" } = {}) {
     start,
     stop,
     reset,
-    // 👇 compatibilidad hacia atrás: algunos componentes aún llaman setTranscript(...)
+    // compatibilidad hacia atrás: algunos componentes aún llaman setTranscript(...)
     setTranscript,
   };
 }
