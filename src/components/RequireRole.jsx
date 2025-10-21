@@ -25,6 +25,5 @@ export default function RequireRole({ allow = [] }) {
     return <Navigate to="/" replace />;
   }
 
-  // Todo ok
   return <Outlet />;
 }
