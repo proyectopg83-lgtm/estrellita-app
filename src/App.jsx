@@ -4,8 +4,8 @@ import { Routes, Route, Link, Navigate } from "react-router-dom";
 import { useAuth } from "./auth.jsx";
 import { getStudentSession } from "./services/studentAuth.js";
 
-import PrivateStudentRoute from "./components/PrivateStudentRoute.jsx"; // guard para estudiante
-import RequireRole from "./components/RequireRole.jsx"; // ✅ import default (recomendado)
+import PrivateStudentRoute from "./components/PrivateStudentRoute.jsx";
+import RequireRole from "./components/RequireRole.jsx";
 
 import StudentHome from "./pages/StudentHome.jsx";
 import LetterPage from "./pages/LetterPage.jsx";
@@ -33,7 +33,6 @@ function Home() {
   );
 }
 
-/** 🔒 Guard Admin (asumiendo teachers.is_admin) */
 function PrivateAdmin({ children }) {
   const { loading, role, teacher } = useAuth();
   if (loading) {
@@ -56,6 +55,11 @@ export default function App() {
         path="/login-estudiante"
         element={ studentSession ? <Navigate to="/estudiante" replace /> : <LoginStudent /> }
       />
+      {/* Alias para QR que use /login-student */}
+      <Route
+        path="/login-student"
+        element={ studentSession ? <Navigate to="/estudiante" replace /> : <LoginStudent /> }
+      />
 
       {/* === LOGIN DOCENTE === */}
       <Route
@@ -69,7 +73,7 @@ export default function App() {
         }
       />
 
-      {/* === ESTUDIANTE (con guard estable) === */}
+      {/* === ESTUDIANTE (con guard) === */}
       <Route
         path="/estudiante"
         element={
@@ -104,7 +108,7 @@ export default function App() {
         }
       />
 
-      {/* === DOCENTE (todas bajo el mismo guard de rol) === */}
+      {/* === DOCENTE === */}
       <Route element={<RequireRole allow={['teacher']} />}>
         <Route path="/docente" element={<Teacher />} />
         <Route path="/docente/roster" element={<Roster />} />

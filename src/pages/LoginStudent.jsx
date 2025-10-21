@@ -27,7 +27,7 @@ export default function LoginStudent() {
       const student = await loginStudentByCode(cleanCode);
       saveStudentSession(student);
 
-      // 👇 Respeta el 'next' si viene del guard y apunta a /estudiante...
+      // Respeta 'next' si viene del guard
       const next = search.get("next");
       const dest = next && decodeURIComponent(next);
       if (dest && dest.startsWith("/estudiante")) {
@@ -48,7 +48,7 @@ export default function LoginStudent() {
     await doLogin(code);
   };
 
-  // 🚀 Autologin si viene ?code=... (por QR o enlace)
+  // Autologin si viene ?code=... (por QR o enlace)
   useEffect(() => {
     if (autoTried.current) return;
     const qp = search.get("code");
@@ -57,10 +57,9 @@ export default function LoginStudent() {
     const clean = normalizeCode(qp);
     if (!clean) return;
     setCode(clean);
-    // Micro delay para que el input se pinte antes del login
     const t = setTimeout(() => doLogin(clean), 50);
     return () => clearTimeout(t);
-  }, [search]);
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <main
@@ -121,7 +120,8 @@ export default function LoginStudent() {
               type="text"
               value={code}
               onChange={onChange}
-              placeholder="Ej: ESTA81C9"  // sin guiones; coincide con BD
+              placeholder="Ej: ESTA81C9"
+              /* sin guiones; debe coincidir con BD */
               style={{
                 border: "none",
                 outline: "none",
