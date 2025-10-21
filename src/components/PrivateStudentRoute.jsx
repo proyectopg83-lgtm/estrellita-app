@@ -17,8 +17,8 @@ export default function PrivateStudentRoute({ children }) {
     loc.pathname.startsWith("/login-student");
 
   useEffect(() => {
-    if (session) return;            // hay sesión, nada que hacer
-    if (isOnLogin) return;          // ya estamos en el login, no redirigir
+    if (session) return;           
+    if (isOnLogin) return;          
 
     // Evita redirigir más de una vez por la misma "key" de ubicación
     if (redirectedForKeyRef.current === loc.key) return;
