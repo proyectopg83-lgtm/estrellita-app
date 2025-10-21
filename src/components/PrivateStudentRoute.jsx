@@ -30,7 +30,7 @@ export default function PrivateStudentRoute({ children }) {
   }, [session, isOnLogin, loc.key]);
 
   if (!session) {
-    // Muestra algo liviano mientras redirige (evita re-renders infinitos)
+    // evita re-renders infinitos
     return (
       <div className="container" style={{ padding: 24, textAlign: "center" }}>
         Cargando…
