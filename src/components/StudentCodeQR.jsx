@@ -12,13 +12,13 @@ export default function StudentCodeQR({ code, onClose }) {
   useEffect(() => {
     if (!code) return;
 
-    // 🔒 Fuerza dominio en producción; usa origin en local
+    //  Fuerza dominio en producción; usa origin en local
     const base = import.meta.env.PROD ? PROD_DOMAIN : window.location.origin;
 
     // Construir URL destino del QR
     const url = `${base}${LOGIN_PATH}?code=${encodeURIComponent(code)}`;
 
-    // ✅ Pequeña “sanitización”: solo aceptamos nuestro dominio en PROD
+    //solo aceptamos nuestro dominio en PROD
     if (import.meta.env.PROD && !url.startsWith(PROD_DOMAIN)) {
       console.warn("[QR] URL rechazada por dominio no permitido:", url);
       return;
