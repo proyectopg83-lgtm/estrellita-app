@@ -44,8 +44,8 @@ const card = {
 function normalizeEs(s) {
   return String(s || "")
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")                // quita signos
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -54,7 +54,6 @@ function collapseConsecutiveRepeats(tokens) {
   for (const t of tokens) if (!out.length || out[out.length - 1] !== t) out.push(t);
   return out;
 }
-// Distancia de edición (Levenshtein)
 function editDistance(ref, hyp) {
   const m = ref.length, n = hyp.length;
   const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
@@ -92,16 +91,14 @@ function combinedAccuracy(expected, actual) {
   return (wer + cer) / 2;
 }
 
-// ====== helpers de tokens (se usan en feedback y en Textos) ======
-function tokensEs(s) {
-  return normalizeEs(s).split(" ").filter(Boolean);
-}
+// ====== helpers de tokens ======
+function tokensEs(s) { return normalizeEs(s).split(" ").filter(Boolean); }
 function multisetCount(arr) {
   const m = new Map();
   for (const x of arr) m.set(x, (m.get(x) || 0) + 1);
   return m;
 }
-function multisetDiff(a, b) { // a - b (con multiplicidad)
+function multisetDiff(a, b) {
   const out = [];
   const mb = multisetCount(b);
   for (const x of a) {
@@ -113,9 +110,7 @@ function multisetDiff(a, b) { // a - b (con multiplicidad)
 }
 function findConsecutiveRepeats(arr) {
   const reps = [];
-  for (let i = 1; i < arr.length; i++) {
-    if (arr[i] === arr[i - 1]) reps.push(arr[i]);
-  }
+  for (let i = 1; i < arr.length; i++) if (arr[i] === arr[i - 1]) reps.push(arr[i]);
   return reps;
 }
 
@@ -124,25 +119,22 @@ function recallAccuracy(expected, actual) {
   const ref = tokensEs(expected);
   const hyp = tokensEs(actual);
   if (!ref.length) return 0;
-
   const hCount = multisetCount(hyp);
   let matches = 0;
   for (const t of ref) {
     const c = hCount.get(t) || 0;
     if (c > 0) { matches += 1; hCount.set(t, c - 1); }
   }
-  return matches / ref.length; // 0..1
+  return matches / ref.length;
 }
 
 // ====== Feedback pedagógico ======
 function buildFeedbackTips(expected, actual, acc) {
   const ref = tokensEs(expected);
   const hyp = tokensEs(actual);
-
-  const missing = multisetDiff(ref, hyp); // faltantes
-  const extras  = multisetDiff(hyp, ref); // añadidas
+  const missing = multisetDiff(ref, hyp);
+  const extras  = multisetDiff(hyp, ref);
   const repeats = findConsecutiveRepeats(hyp);
-
   const tips = [];
 
   if (acc >= 0.9) tips.push("Excelente lectura. ¡Sigue así!");
@@ -154,32 +146,22 @@ function buildFeedbackTips(expected, actual, acc) {
     const show = [...new Set(missing)].slice(0, 3).join(", ");
     tips.push(`No olvides: ${show}.`);
   }
-  if (extras.length >= 2) {
-    tips.push("Evita añadir palabras que no están en la oración.");
-  }
-  if (repeats.length) {
-    tips.push("Evita repetir palabras (di cada palabra una sola vez).");
-  }
-  if (hyp.length >= ref.length * 1.6) {
-    tips.push("Parece que agregaste varias palabras. Lee solo lo que escuchas.");
-  } else if (hyp.length <= ref.length * 0.6) {
-    tips.push("Faltaron varias palabras. Lee la oración completa.");
-  }
+  if (extras.length >= 2) tips.push("Evita añadir palabras que no están en la oración.");
+  if (repeats.length) tips.push("Evita repetir palabras (di cada palabra una sola vez).");
+  if (hyp.length >= ref.length * 1.6) tips.push("Parece que agregaste varias palabras. Lee solo lo que escuchas.");
+  else if (hyp.length <= ref.length * 0.6) tips.push("Faltaron varias palabras. Lee la oración completa.");
   tips.push("Consejo: repite pausado y claro. ¡Tú puedes!");
 
   return tips;
 }
 
-// ====== TTS (leer en voz alta el primer tip) ======
+// ====== TTS ======
 function speakFeedback(text) {
   if (!("speechSynthesis" in window)) return;
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "es-ES";
   utter.rate = 1.0;
-  try {
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utter);
-  } catch {}
+  try { window.speechSynthesis.cancel(); window.speechSynthesis.speak(utter); } catch {}
 }
 
 export default function SentencesPage() {
@@ -190,7 +172,6 @@ export default function SentencesPage() {
   const set = findSentenceSet(id);
   const isText = set?.type === "text";
 
-  // navegación en oraciones
   const [idx, setIdx] = useState(0);
   const currentSentence = useMemo(
     () => (!isText ? set?.sentences?.[idx] || null : null),
@@ -199,18 +180,17 @@ export default function SentencesPage() {
   const hasPrev = !isText && idx > 0;
   const hasNext = !isText && idx < (set?.sentences?.length || 0) - 1;
 
-  // Reconocimiento de voz
-  const { supported, listening, transcript, start, stop, setTranscript } = useWebSpeech();
+  // 🔁 Usa el nuevo hook: reset en vez de setTranscript
+  const { supported, listening, transcript, start, stop, reset } = useWebSpeech();
 
-  // Resultado + errores
-  const [resultAccuracy, setResultAccuracy] = useState(null); // 0..1
+  const [resultAccuracy, setResultAccuracy] = useState(null);
   const [feedback, setFeedback] = useState("");
   const [feedbackTips, setFeedbackTips] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setTranscript("");
+    reset();
     setResultAccuracy(null);
     setFeedback("");
     setFeedbackTips([]);
@@ -227,13 +207,11 @@ export default function SentencesPage() {
     );
   }
 
-  // ✅ Para textos: usar todos los párrafos concatenados (o título como respaldo)
   const fullText = isText
     ? (set?.paragraphs?.join(" ") || set?.title || "")
     : "";
   const expectedText = isText ? fullText : (currentSentence?.text || "");
 
-  // total de oraciones del catálogo (para % local)
   const totalSentencesAll = SENTENCE_SETS
     .filter(s => s.type === "sentences")
     .reduce((a, s) => a + (s.sentences?.length || 0), 0);
@@ -250,11 +228,11 @@ export default function SentencesPage() {
 
   const handleStart = () => {
     if (!supported) {
-      setErrorMsg("Tu navegador no soporta reconocimiento de voz (Web Speech). Prueba Chrome/Edge.");
+      setErrorMsg("Tu navegador no soporta reconocimiento de voz (Web Speech). Prueba Chrome/Edge o Safari en iOS.");
       return;
     }
     setErrorMsg("");
-    setTranscript("");
+    reset(); // limpia transcript con el nuevo hook
     setResultAccuracy(null);
     setFeedback("");
     setFeedbackTips([]);
@@ -262,7 +240,6 @@ export default function SentencesPage() {
   };
   const handleStop = () => stop();
 
-  // Guardar en BD (RPC)
   const handleSave = async () => {
     if (!transcript) {
       setErrorMsg("No hay transcripción. Graba primero con “Grabar lectura”.");
@@ -272,18 +249,15 @@ export default function SentencesPage() {
       setSubmitting(true);
       setErrorMsg("");
 
-      // ✅ Textos: promedio de “recall” por párrafo (no penaliza que la transcripción incluya otros párrafos)
       let acc;
       if (isText && Array.isArray(set?.paragraphs) && set.paragraphs.length) {
         const accs = set.paragraphs.map(p => recallAccuracy(p, transcript));
         acc = accs.reduce((a, b) => a + b, 0) / accs.length;
       } else {
-        // Oraciones u otros: WER+CER combinados
         acc = combinedAccuracy(expectedText, transcript);
       }
       setResultAccuracy(acc);
 
-      // Tips usando el texto completo
       const tips = buildFeedbackTips(expectedText, transcript, acc);
       setFeedbackTips(tips);
       setFeedback(
@@ -291,16 +265,12 @@ export default function SentencesPage() {
         acc >= 0.6 ? "🟡 Bien, puedes mejorar." :
         "🔴 Repite de nuevo con calma."
       );
-
-      // Lee en voz alta el primer tip (opcional)
       if (tips[0]) speakFeedback(tips[0]);
 
-      // progreso local (intermedio)
       const area = isText ? "texts" : "sentences";
       const key = isText ? keyText(id) : keySentence(id, idx);
       markIntermediate(user?.uid || "guest", area, key, "submitted");
 
-      // guarda en BD real
       const session = getStudentSession();
       const studentCode =
         session?.student?.student_code ||
@@ -312,7 +282,7 @@ export default function SentencesPage() {
         setErrorMsg("No hay código de estudiante en la sesión.");
       } else {
         const kind = isText ? "text" : "sentence";
-        const target = isText ? set.id : `${set.id}:${idx}`; // verifica que exista en curriculum_targets
+        const target = isText ? set.id : `${set.id}:${idx}`;
 
         await saveAssessRPC({
           studentCode,
@@ -322,7 +292,6 @@ export default function SentencesPage() {
           transcript,
         });
 
-        // estado final local (para tu UI)
         if (isText) {
           const totalTexts = SENTENCE_SETS.filter(s => s.type === "text").length;
           markAssessed(user?.uid || "guest", "texts", key, acc >= 0.8, totalTexts, "texts:");
@@ -338,7 +307,6 @@ export default function SentencesPage() {
     }
   };
 
-  // textos vecinos
   const textSets = useMemo(() => SENTENCE_SETS.filter(s => s.type === "text"), []);
   const textIndex = useMemo(() => textSets.findIndex(s => s.id === id), [textSets, id]);
   const prevTextId = textIndex > 0 ? textSets[textIndex - 1].id : null;
@@ -407,7 +375,6 @@ export default function SentencesPage() {
               </div>
             )}
 
-            {/* Si no quieres mostrar el texto de la oración, oculta este <p> */}
             <p
               style={{
                 fontSize: "1.6rem",
@@ -490,7 +457,6 @@ export default function SentencesPage() {
               </div>
             )}
 
-            {/* Si no quieres mostrar los párrafos, oculta este bloque */}
             <div style={{ display: "grid", gap: 10 }}>
               {set.paragraphs?.map((p, i) => (
                 <p key={i} style={{ fontSize: "1.2rem", lineHeight: 1.6, color: "#1d2d50", margin: 0 }}>
