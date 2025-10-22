@@ -16,8 +16,8 @@ export default function SyllableButton({ text, audio }) {
     // 2) Fallback: Text-to-Speech del navegador
     if ("speechSynthesis" in window) {
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = "es-ES";  // latino neutro (puedes probar 'es-MX' también)
-      u.rate = 0.9;      // un poquito más lento
+      u.lang = "es-ES"; 
+      u.rate = 0.9;     
       window.speechSynthesis.speak(u);
     } else {
       alert(`Sílaba: ${text}`);
