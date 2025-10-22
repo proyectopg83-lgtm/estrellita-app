@@ -1,14 +1,10 @@
 // src/services/auth.js
 import { supabase } from "../lib/supabaseClient";
 
-/* =========================
-   Utilidades pequeñas
-   ========================= */
+
 const normEmail = (e) => String(e || "").trim().toLowerCase();
 
-/* =========================
-   SIGN UP / SIGN IN / SIGN OUT
-   ========================= */
+/* SIGN UP / SIGN IN / SIGN OUT */
 
 /** Registro docente (opcional) */
 export async function signUpTeacher({ email, password, fullName }) {
@@ -68,9 +64,7 @@ export function onAuthStateChange(callback) {
   };
 }
 
-/* =========================
-   PERFILES (docente)
-   ========================= */
+/* PERFILES (docente) */
 
 /**
  * Devuelve { user, role, teacher }.
