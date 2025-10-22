@@ -1,6 +1,6 @@
-// ==============================
+
 // src/mock/localAccess.js  (con migración de storage)
-// ==============================
+
 
 const TEACHERS_KEY = "estrellita_teachers";
 const ADMIN_KEY    = "estrellita_admin";
@@ -22,10 +22,10 @@ function getTeachersMap() {
   // si no hay nada, deja que seed lo cree
   if (!data) return null;
 
-  // ✅ caso 1: ya es objeto -> ok
+  //  caso 1: ya es objeto -> ok
   if (data && typeof data === "object" && !Array.isArray(data)) return data;
 
-  // ✅ caso 2: es array -> migrar a mapa
+  //  caso 2: es array -> migrar a mapa
   if (Array.isArray(data)) {
     const map = {};
     for (const t of data) {
