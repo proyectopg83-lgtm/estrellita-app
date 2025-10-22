@@ -1,6 +1,6 @@
-// =========================
+
 // src/mock/localRoster.js
-// =========================
+
 
 // Estructura en localStorage:
 // STUDENTS_KEY: { [uid]: Student }
@@ -48,7 +48,7 @@ function writeList(list) {
   writeRaw(map);
 }
 
-// ===== Generar código de alumno legible y único (GLOBAL) =====
+// ===== Generar código de alumno legible =====
 // Formato: AAA-12345  (sin I/O y sin 0/1 para evitar confundir)
 function genStudentCode() {
   const ABC  = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // sin I, O
@@ -84,7 +84,7 @@ export function addStudentToRoster({ uid, classId, teacherId, status = "active" 
   return students[uid];
 }
 
-// === Crear alumno manualmente (docente) con CÓDIGO ÚNICO GLOBAL ===
+// === Crear alumno manualmente  con CÓDIGO ÚNICO GLOBAL ===
 export function createStudentManual({
   displayName, grade, section, classId, teacherId,
   dob = null, guardianName = "", guardianPhone = "", guardianEmail = "",
@@ -235,7 +235,7 @@ export function getStudentStatus(uid) {
   return students[uid]?.status || null;
 }
 
-// === NUEVA FUNCIÓN EDITAR (FUNCIONAL Y SEGURA) ===
+// === FUNCIÓN EDITAR  ===
 export function updateStudentInfo(uid, updates = {}) {
   const list = readList();
   const idx = list.findIndex(s => s.uid === uid);
