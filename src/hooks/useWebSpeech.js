@@ -37,7 +37,7 @@ export function useWebSpeech({ lang = "es-ES" } = {}) {
 
     rec.lang = lang;                  // "es-ES" o "es-419"
     rec.interimResults = false;       // móviles duplican si true
-    rec.continuous = !mobile;         // desktop: continuo; móvil: sesiones cortas
+    rec.continuous = !mobile;         
     rec.maxAlternatives = 1;
 
     rec.onresult = (event) => {
@@ -101,7 +101,7 @@ export function useWebSpeech({ lang = "es-ES" } = {}) {
     setTranscript("");
   }, []);
 
-  // 👇 Publica un "stop global" para que logoutStudent() corte el micrófono antes de redirigir
+  // Publica un "stop global" para que logoutStudent() corte el micrófono antes de redirigir
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.__estrellitaStopSR = stop;
