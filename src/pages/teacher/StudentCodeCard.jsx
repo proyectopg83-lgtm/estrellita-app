@@ -145,7 +145,7 @@ export default function StudentCodeCard() {
             border: 1px solid #ddd;
           }
         }
-        /* ✅ apila a 1 columna antes y centra QR */
+        /* apila a 1 columna antes y centra QR */
         @media (max-width: 900px) {
           #print-card {
             grid-template-columns: 1fr !important;
@@ -156,7 +156,7 @@ export default function StudentCodeCard() {
             justify-self: center !important;
           }
         }
-        /* ✅ ajustes extra pequeños */
+        /* ajustes extra pequeños */
         @media (max-width: 480px) {
           #print-card .title {
             font-size: 30px !important;
