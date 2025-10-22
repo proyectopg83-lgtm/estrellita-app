@@ -10,7 +10,7 @@ import {
   updateStudentInfo as updateStudentInfoSvc,
 } from "../../services/students.js";
 
-/** 🧩 Formato de fecha (YYYY-MM-DD → DD/MM/YYYY) */
+/**  Formato de fecha (YYYY-MM-DD → DD/MM/YYYY) */
 function fmtDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
@@ -18,7 +18,7 @@ function fmtDate(iso) {
   return d.toLocaleDateString("es-PE", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
-/** ✂️ Divide nombre completo → { first_name, last_name } */
+/**  Divide nombre completo → { first_name, last_name } */
 function splitName(full) {
   const parts = String(full || "").trim().split(/\s+/);
   const first_name = parts.shift() || "";
@@ -26,7 +26,7 @@ function splitName(full) {
   return { first_name, last_name };
 }
 
-/** 🎓 Módulo principal: Roster de alumnos del docente actual */
+/**  Módulo principal: Roster de alumnos del docente actual */
 export default function Roster() {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -48,7 +48,7 @@ export default function Roster() {
   const [editSection, setEditSection] = useState("A");
   const [editDob, setEditDob] = useState("");
 
-  /** 🔄 Carga inicial de alumnos */
+  /**  Carga inicial de alumnos */
   const refresh = async () => {
     setLoading(true);
     try {
@@ -66,7 +66,7 @@ export default function Roster() {
     refresh();
   }, []);
 
-  /** 🧹 Limpia el formulario */
+  /**  Limpia el formulario */
   function clearForm() {
     setDisplayName("");
     setSection("A");
@@ -75,7 +75,7 @@ export default function Roster() {
     setLastCode("");
   }
 
-  /** ➕ Registrar nuevo alumno */
+  /**  Registrar nuevo alumno */
   async function onCreate(e) {
     e.preventDefault();
     setErr("");
@@ -95,7 +95,7 @@ export default function Roster() {
     }
   }
 
-  /** 🔄 Cambiar estado (active ↔ blocked) */
+  /**  Cambiar estado  */
   async function onToggle(uid, status) {
     try {
       await updateStudentStatusSvc({
@@ -108,7 +108,7 @@ export default function Roster() {
     }
   }
 
-  /** ❌ Eliminar alumno */
+  /**  Eliminar alumno */
   async function onRemove(uid) {
     if (!confirm("¿Deseas eliminar este alumno?")) return;
     try {
@@ -119,7 +119,7 @@ export default function Roster() {
     }
   }
 
-  /** ✏️ Cargar datos del alumno en edición */
+  /**  Cargar datos del alumno en edición */
   useEffect(() => {
     if (editing) {
       setEditName(`${editing.first_name || ""} ${editing.last_name || ""}`);
@@ -128,7 +128,7 @@ export default function Roster() {
     }
   }, [editing]);
 
-  /** 💾 Guardar edición */
+  /**  Guardar edición */
   async function handleSaveEdit() {
     try {
       const { first_name, last_name } = splitName(editName);
@@ -146,7 +146,7 @@ export default function Roster() {
     }
   }
 
-  /** 🔍 Filtro de búsqueda */
+  /**  Filtro de búsqueda */
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
