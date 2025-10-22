@@ -20,7 +20,7 @@ export default function StudentHome() {
   const [showQR, setShowQR] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // ✅ Leemos la sesión una vez; la redirección la maneja el guard PrivateStudent
+  //  la redirección la maneja el guard PrivateStudent
   useEffect(() => {
     const s = getStudentSession();
     setStudent(s);
