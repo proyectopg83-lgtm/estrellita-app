@@ -127,7 +127,7 @@ export default function TeacherProfile() {
           </button>
         </form>
 
-        {/* 🔙 Botón de regresar estilo Roster */}
+        {/*  Botón de regresar estilo Roster */}
         <div style={{ textAlign: "center", marginTop: 25 }}>
           <button
             onClick={() => navigate("/docente")}
