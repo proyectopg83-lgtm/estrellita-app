@@ -180,10 +180,10 @@ export default function SentencesPage() {
   const hasPrev = !isText && idx > 0;
   const hasNext = !isText && idx < (set?.sentences?.length || 0) - 1;
 
-  // 🔁 Hook de voz
+  //  Hook de voz
   const { supported, listening, transcript, start, stop, reset } = useWebSpeech();
 
-  // ⛔️ Detener el reconocimiento si el usuario navega fuera de esta página
+  //  Detener el reconocimiento si el usuario navega fuera de esta página
   useEffect(() => {
     return () => {
       try { stop(); } catch {}
