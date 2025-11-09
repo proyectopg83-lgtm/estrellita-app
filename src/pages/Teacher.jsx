@@ -102,6 +102,9 @@ export default function Teacher() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // === NUEVO: tamaño de página para listar más ===
+  const [pageSize, setPageSize] = useState(20);
+
   // Estado para el modal de QR
   const [qrCode, setQrCode] = useState(null);
   const openQR = (code) => {
@@ -264,94 +267,118 @@ export default function Teacher() {
           ) : !students.length ? (
             <p style={{ margin: 0, color: "#555" }}>Aún no hay estudiantes registrados.</p>
           ) : (
-            <div style={{ width: "100%", overflowX: "auto" }}>
-              <table
-                style={{
-                  width: "100%",
-                  minWidth: 720,
-                  borderCollapse: "collapse",
-                }}
-              >
-                <thead>
-                  <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                    <th className="t-cell" style={{ padding: 8 }}>Nombre</th>
-                    <th className="t-cell" style={{ padding: 8 }}>Código</th>
-                    <th className="t-cell" style={{ padding: 8 }}>Sección</th>
-                    <th className="t-cell" style={{ padding: 8 }}>Progreso</th>
-                    <th className="t-cell" style={{ padding: 8 }}>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.slice(0, 8).map((s, idx) => (
-                    <tr
-                      key={s.uid}
-                      style={{
-                        borderBottom: "1px solid #f4f4f4",
-                        background: idx % 2 ? "#fcfdff" : "#fff",
-                      }}
-                    >
-                      <td className="t-cell" style={{ padding: 8 }}>{s.displayName}</td>
-                      <td className="t-cell" style={{ padding: 8, fontFamily: "monospace" }}>
-                        {s.studentCode || "—"}
-                      </td>
-                      <td className="t-cell" style={{ padding: 8 }}>{s.section}</td>
-                      <td className="t-cell" style={{ padding: 8 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <ProgressBar value={s.progress} />
-                          <b>{s.progress || 0}%</b>
-                        </div>
-                        {s.areas && <AreaChips areas={s.areas} />}
-                      </td>
-                      <td className="t-cell" style={{ padding: 8 }}>
-                        <div className="t-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                          <button
-                            onClick={() =>
-                              nav(`/docente/alumno/${s.uid}`, {
-                                state: {
-                                  student: {
-                                    uid: s.uid,
-                                    first_name: s.first_name,
-                                    last_name: s.last_name,
-                                    displayName: s.displayName,
-                                    status: s.status,
-                                  },
-                                },
-                              })
-                            }
-                            style={{
-                              padding: "6px 10px",
-                              borderRadius: 8,
-                              background: "#b0dcffff",
-                              cursor: "pointer",
-                              border: "none",
-                              fontWeight: 600,
-                              fontFamily: '"Century Gothic", CenturyGothic, AppleGothic, sans-serif',
-                            }}
-                          >
-                            Informe
-                          </button>
-                          <button
-                            onClick={() => openQR(s.studentCode)}
-                            style={{
-                              padding: "6px 10px",
-                              borderRadius: 8,
-                              background: "#c1f371ff",
-                              color: "#1fb708ff",
-                              fontWeight: 600,
-                              border: "none",
-                              cursor: "pointer",
-                              fontFamily: '"Century Gothic", CenturyGothic, AppleGothic, sans-serif',
-                            }}
-                          >
-                            QR
-                          </button>
-                        </div>
-                      </td>
+            <>
+              <div style={{ width: "100%", overflowX: "auto" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    minWidth: 720,
+                    borderCollapse: "collapse",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
+                      <th className="t-cell" style={{ padding: 8 }}>Nombre</th>
+                      <th className="t-cell" style={{ padding: 8 }}>Código</th>
+                      <th className="t-cell" style={{ padding: 8 }}>Sección</th>
+                      <th className="t-cell" style={{ padding: 8 }}>Progreso</th>
+                      <th className="t-cell" style={{ padding: 8 }}>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {students.slice(0, pageSize).map((s, idx) => (
+                      <tr
+                        key={s.uid}
+                        style={{
+                          borderBottom: "1px solid #f4f4f4",
+                          background: idx % 2 ? "#fcfdff" : "#fff",
+                        }}
+                      >
+                        <td className="t-cell" style={{ padding: 8 }}>{s.displayName}</td>
+                        <td className="t-cell" style={{ padding: 8, fontFamily: "monospace" }}>
+                          {s.studentCode || "—"}
+                        </td>
+                        <td className="t-cell" style={{ padding: 8 }}>{s.section}</td>
+                        <td className="t-cell" style={{ padding: 8 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <ProgressBar value={s.progress} />
+                            <b>{s.progress || 0}%</b>
+                          </div>
+                          {s.areas && <AreaChips areas={s.areas} />}
+                        </td>
+                        <td className="t-cell" style={{ padding: 8 }}>
+                          <div className="t-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            <button
+                              onClick={() =>
+                                nav(`/docente/alumno/${s.uid}`, {
+                                  state: {
+                                    student: {
+                                      uid: s.uid,
+                                      first_name: s.first_name,
+                                      last_name: s.last_name,
+                                      displayName: s.displayName,
+                                      status: s.status,
+                                    },
+                                  },
+                                })
+                              }
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: 8,
+                                background: "#b0dcffff",
+                                cursor: "pointer",
+                                border: "none",
+                                fontWeight: 600,
+                                fontFamily: '"Century Gothic", CenturyGothic, AppleGothic, sans-serif',
+                              }}
+                            >
+                              Informe
+                            </button>
+                            <button
+                              onClick={() => openQR(s.studentCode)}
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: 8,
+                                background: "#c1f371ff",
+                                color: "#1fb708ff",
+                                fontWeight: 600,
+                                border: "none",
+                                cursor: "pointer",
+                                fontFamily: '"Century Gothic", CenturyGothic, AppleGothic, sans-serif',
+                              }}
+                            >
+                              QR
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* === NUEVO: botón "Mostrar 20 más" === */}
+              {students.length > pageSize && (
+                <div style={{ marginTop: 12, textAlign: "center" }}>
+                  <button
+                    onClick={() => setPageSize((p) => p + 20)}
+                    style={{
+                      border: "none",
+                      background: "#e8f0fe",
+                      color: "#0d47a1",
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      boxShadow: "0 4px 10px rgba(0,0,0,.08)",
+                      fontFamily: '"Century Gothic", CenturyGothic, AppleGothic, sans-serif',
+                    }}
+                  >
+                    Mostrar 20 más
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>

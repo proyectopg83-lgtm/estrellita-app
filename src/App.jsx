@@ -23,7 +23,7 @@ import Admin from "./pages/admin/Admin.jsx";
 function Home() {
   return (
     <div className="container">
-      <h1>🌟 Bienvenido a Estrellita 🌟</h1>
+      <h1>🌟 Bienvenido a Estrellita Digital 🌟</h1>
       <p>Aprendiendo a leer con el método Estrellita</p>
       <div className="buttons">
         <Link to="/login-estudiante" className="btn btn-student">👧👦 Soy Estudiante</Link>
